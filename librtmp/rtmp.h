@@ -30,7 +30,7 @@
 #endif
 
 #include <errno.h>
-#include <stdint.h>
+#include "stdint.h"
 #include <stddef.h>
 
 #include "amf.h"
@@ -132,11 +132,12 @@ extern "C"
     char sb_buf[RTMP_BUFFER_CACHE_SIZE];	/* data read from socket */
     int sb_timedout;
     void *sb_ssl;
+    uint8_t sb_readable;
   } RTMPSockBuf;
 
   void RTMPPacket_Reset(RTMPPacket *p);
   void RTMPPacket_Dump(RTMPPacket *p);
-  int RTMPPacket_Alloc(RTMPPacket *p, uint32_t nSize);
+  int RTMPPacket_Alloc(RTMPPacket *p, int nSize);
   void RTMPPacket_Free(RTMPPacket *p);
 
 #define RTMPPacket_IsReady(a)	((a)->m_nBytesRead == (a)->m_nBodySize)
@@ -280,6 +281,9 @@ extern "C"
     RTMPPacket m_write;
     RTMPSockBuf m_sb;
     RTMP_LNK Link;
+
+    uint32_t m_nPlayerCount; /* client count on server */
+    uint8_t  m_bCustomMsg;
   } RTMP;
 
   int RTMP_ParseURL(const char *url, int *protocol, AVal *host,

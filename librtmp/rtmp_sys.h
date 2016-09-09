@@ -31,7 +31,9 @@
 #define snprintf _snprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
-#define vsnprintf _vsnprintf
+// #ifndef vsnprintf
+// #define vsnprintf _vsnprintf
+// #endif
 #endif
 
 #define GetSockError()	WSAGetLastError()
@@ -40,7 +42,7 @@
 #define EWOULDBLOCK	WSAETIMEDOUT	/* we don't use nonblocking, but we do use timeouts */
 #define sleep(n)	Sleep(n*1000)
 #define msleep(n)	Sleep(n)
-#define SET_RCVTIMEO(tv,s)	int tv = s*1000
+#define SET_RCVTIMEO(tv,s)	struct timeval tv = {s,0}
 #else /* !_WIN32 */
 #include <sys/types.h>
 #include <sys/socket.h>

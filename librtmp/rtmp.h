@@ -133,6 +133,7 @@ extern "C"
     int sb_timedout;
     void *sb_ssl;
     uint8_t sb_readable;
+    uint8_t sb_errorcount;
   } RTMPSockBuf;
 
   void RTMPPacket_Reset(RTMPPacket *p);

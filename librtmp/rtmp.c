@@ -543,6 +543,10 @@ static const char *optinfo[] = {
 
 #define OFF(x)	offsetof(struct RTMP,x)
 
+#if (defined _WIN32) || (defined _WIN64)
+typedef long off_t;
+#endif
+
 static struct urlopt {
     AVal name;
     off_t off;
@@ -915,7 +919,7 @@ int
             int err = GetSockError();
             RTMP_Log(RTMP_LOGERROR, "%s, failed to connect socket. %d (%s)",
                 __FUNCTION__, err, strerror(err));
-            RTMP_Close(r);
+            //RTMP_Close(r);
             return FALSE;
         }
 
@@ -925,7 +929,7 @@ int
             if (!SocksNegotiate(r))
             {
                 RTMP_Log(RTMP_LOGERROR, "%s, SOCKS negotiation failed.", __FUNCTION__);
-                RTMP_Close(r);
+                //RTMP_Close(r);
                 return FALSE;
             }
         }
@@ -981,12 +985,12 @@ int
         if (TLS_connect(r->m_sb.sb_ssl) < 0)
         {
             RTMP_Log(RTMP_LOGERROR, "%s, TLS_Connect failed", __FUNCTION__);
-            RTMP_Close(r);
+            //RTMP_Close(r);
             return FALSE;
         }
 #else
         RTMP_Log(RTMP_LOGERROR, "%s, no SSL/TLS support", __FUNCTION__);
-        RTMP_Close(r);
+        //RTMP_Close(r);
         return FALSE;
 
 #endif
@@ -1010,7 +1014,7 @@ int
     if (!HandShake(r, TRUE))
     {
         RTMP_Log(RTMP_LOGERROR, "%s, handshake failed.", __FUNCTION__);
-        RTMP_Close(r);
+        //RTMP_Close(r);
         return FALSE;
     }
     RTMP_Log(RTMP_LOGDEBUG, "%s, handshaked", __FUNCTION__);
@@ -1018,7 +1022,7 @@ int
     if (!SendConnectPacket(r, cp))
     {
         RTMP_Log(RTMP_LOGERROR, "%s, RTMP connect failed.", __FUNCTION__);
-        RTMP_Close(r);
+        //RTMP_Close(r);
         return FALSE;
     }
     return TRUE;
@@ -1514,20 +1518,6 @@ static int
     }
 #endif
 
-    if ((r->Link.protocol & RTMP_FEATURE_WRITE) && r->m_bPlaying && !r->m_sb.sb_readable)
-    {
-        SET_RCVTIMEO(tv, 0);
-        fd_set rfds;
-        int ret = 0;
-
-        FD_ZERO(&rfds);
-        FD_SET(r->m_sb.sb_socket, &rfds);
-        ret = select(r->m_sb.sb_socket + 1, &rfds, NULL, NULL, &tv);
-        if (1 == ret) {
-            r->m_sb.sb_readable = FD_ISSET(r->m_sb.sb_socket, &rfds) ? 1 : 0;
-        }
-    }
-
     while (n > 0)
     {
         int nBytes;
@@ -1563,6 +1553,20 @@ static int
     if (encrypted && encrypted != buf)
         free(encrypted);
 #endif
+
+    if ((r->Link.protocol & RTMP_FEATURE_WRITE) && r->m_bPlaying && !r->m_sb.sb_readable)
+    {
+        SET_RCVTIMEO2(tv, 0, 1);
+        fd_set rfds;
+        int ret = 0;
+
+        FD_ZERO(&rfds);
+        FD_SET(r->m_sb.sb_socket, &rfds);
+        ret = select(r->m_sb.sb_socket + 1, &rfds, NULL, NULL, &tv);
+        if (1 == ret) {
+            r->m_sb.sb_readable = FD_ISSET(r->m_sb.sb_socket, &rfds) ? 1 : 0;
+        }
+    }
 
     return n == 0;
 }
@@ -4293,6 +4297,7 @@ RTMPSockBuf_Fill(RTMPSockBuf *sb)
         if (nBytes != -1)
         {
             sb->sb_size += nBytes;
+            sb->sb_errorcount = 0;
         }
         else
         {
@@ -4301,6 +4306,16 @@ RTMPSockBuf_Fill(RTMPSockBuf *sb)
                 __FUNCTION__, nBytes, sockerr, strerror(sockerr));
             if (sockerr == EINTR && !RTMP_ctrlC)
                 continue;
+
+#if (defined _WIN32) || (defined _WIN64)
+            if (sockerr == 10060)
+            {
+                if (++ sb->sb_errorcount < 10)
+                {
+                    continue;
+                }
+            }
+#endif 
 
             if (sockerr == EWOULDBLOCK || sockerr == EAGAIN)
             {
@@ -4317,7 +4332,7 @@ RTMPSockBuf_Fill(RTMPSockBuf *sb)
 int
     RTMPSockBuf_Send(RTMPSockBuf *sb, const char *buf, int len)
 {
-    int rc;
+    int rc = 0;
 
     // #ifdef _DEBUG
     //   fwrite(buf, 1, len, netstackdump);

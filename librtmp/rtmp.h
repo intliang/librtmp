@@ -363,6 +363,7 @@ extern "C"
   int RTMPSockBuf_Fill(RTMPSockBuf *sb);
   int RTMPSockBuf_Send(RTMPSockBuf *sb, const char *buf, int len);
   int RTMPSockBuf_Close(RTMPSockBuf *sb);
+  int RTMPSockBuf_Shutdown(RTMPSockBuf *sb);
 
   int RTMP_SendCreateStream(RTMP *r);
   int RTMP_SendSeek(RTMP *r, int dTime);

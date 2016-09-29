@@ -4367,6 +4367,14 @@ int
     return 0;
 }
 
+int
+RTMPSockBuf_Shutdown(RTMPSockBuf *sb)
+{
+    if (sb->sb_socket != -1)
+        return shutdown(sb->sb_socket, 2);
+    return 0;
+}
+
 #define HEX2BIN(a)	(((a)&0x40)?((a)&0xf)+9:((a)&0xf))
 
 static void

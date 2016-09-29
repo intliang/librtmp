@@ -16,6 +16,7 @@
  *  Date: 2000-12-02
  */
 
+#if defined(WIN32) || defined(WIN64)
 
 #ifndef _STDINT_H
 #define _STDINT_H
@@ -201,3 +202,8 @@ typedef unsigned __int64   uintmax_t;
 #endif  /* !defined ( __cplusplus) || defined __STDC_CONSTANT_MACROS */
 
 #endif
+
+#else // #if defined(WIN32) || defined(WIN64)
+#include <stdint.h>
+
+#endif // #if defined(WIN32) || defined(WIN64)

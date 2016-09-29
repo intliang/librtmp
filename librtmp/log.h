@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include "stdint.h"
+#include "def.h"
 
 #ifdef __cplusplus
 extern "C" {

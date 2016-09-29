@@ -26,7 +26,7 @@
 #ifndef __BYTES_H__
 #define __BYTES_H__
 
-#include <stdint.h>
+#include "def.h"
 
 #ifdef _WIN32
 /* Windows is little endian only */

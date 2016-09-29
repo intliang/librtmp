@@ -21,7 +21,7 @@
  *  http://www.gnu.org/copyleft/lgpl.html
  */
 
-#include <stdint.h>
+#include "def.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>

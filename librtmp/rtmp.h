@@ -251,6 +251,11 @@ extern "C"
     int m_pausing;
     int m_nServerBW;
     int m_nClientBW;
+
+    uint32_t m_nPlayerCount; /* client count on server */
+    uint8_t  m_bCustomMsg;
+    uint8_t  resv[3];
+
     uint8_t m_nClientBW2;
     uint8_t m_bPlaying;
     uint8_t m_bSendEncoding;
@@ -259,17 +264,14 @@ extern "C"
     int m_numInvokes;
     int m_numCalls;
     RTMP_METHOD *m_methodCalls;	/* remote method calls queue */
-
     int m_channelsAllocatedIn;
     int m_channelsAllocatedOut;
     RTMPPacket **m_vecChannelsIn;
     RTMPPacket **m_vecChannelsOut;
     int *m_channelTimestamp;	/* abs timestamp of last packet */
-
     double m_fAudioCodecs;	/* audioCodecs for the connect packet */
     double m_fVideoCodecs;	/* videoCodecs for the connect packet */
     double m_fEncoding;		/* AMF0 or AMF3 */
-
     double m_fDuration;		/* duration of stream in seconds */
 
     int m_msgCounter;		/* RTMPT stuff */
@@ -282,9 +284,6 @@ extern "C"
     RTMPPacket m_write;
     RTMPSockBuf m_sb;
     RTMP_LNK Link;
-
-    uint32_t m_nPlayerCount; /* client count on server */
-    uint8_t  m_bCustomMsg;
   } RTMP;
 
   int RTMP_ParseURL(const char *url, int *protocol, AVal *host,
